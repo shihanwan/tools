@@ -1,16 +1,17 @@
 import json
 import os
+import sys
 import time
 from datetime import datetime
 from pynput import keyboard
 
 
 class InputLogger:
-    def __init__(self):
+    def __init__(self, tracked_keys: set = None):
         self.inputs = []
         self.start_time = None
         self.is_recording = False
-        self.tracked_keys = {"w", "a", "s", "d", "space"}
+        self.tracked_keys = tracked_keys or {"w", "a", "s", "d", "space"}
         self.timestamp_format = "%d/%m/%Y %H:%M:%S.%f"
 
     def start_recording(self):
@@ -35,6 +36,7 @@ class InputLogger:
                 "start_time": datetime.fromtimestamp(self.start_time).isoformat(),
                 "duration_seconds": time.time() - self.start_time,
                 "total_inputs": len(self.inputs),
+                "tracked_keys": list(self.tracked_keys),
             },
             "inputs": self.inputs,
         }
@@ -60,14 +62,15 @@ class InputLogger:
         except:
             key_name = str(key).replace("Key.", "").lower()
 
-        # Only log tracked keys
+        timestamp = datetime.now().strftime(self.timestamp_format)[:-3]
+
         if key_name in self.tracked_keys:
-            timestamp = datetime.now().strftime(self.timestamp_format)[:-3]
             self.inputs.append(
                 {
                     "timestamp": timestamp,
                     "key": key_name,
                     "action": "press",
+                    "tracked": key_name in self.tracked_keys,
                 }
             )
             print(f"⌨️  [{timestamp}] {key_name.upper()} pressed")
@@ -87,16 +90,18 @@ class InputLogger:
         except:
             key_name = str(key).replace("Key.", "").lower()
 
-        # Only log tracked keys
+        timestamp = datetime.now().strftime(self.timestamp_format)[:-3]
+
         if key_name in self.tracked_keys:
-            timestamp = datetime.now().strftime(self.timestamp_format)[:-3]
             self.inputs.append(
                 {
                     "timestamp": timestamp,
                     "key": key_name,
                     "action": "release",
+                    "tracked": key_name in self.tracked_keys,
                 }
             )
+            print(f"⌨️  [{timestamp}] {key_name.upper()} released")
 
     def run(self):
         """Main run loop"""
@@ -111,7 +116,8 @@ class InputLogger:
 
         # Start keyboard listener
         with keyboard.Listener(
-            on_press=self.on_press, on_release=self.on_release
+            on_press=self.on_press,
+            on_release=self.on_release,
         ) as listener:
             listener.join()
 
@@ -119,5 +125,9 @@ class InputLogger:
 
 
 if __name__ == "__main__":
-    logger = InputLogger()
+    if len(sys.argv) > 1:
+        tracked_keys = set(sys.argv[1:])
+        logger = InputLogger(tracked_keys=tracked_keys)
+    else:
+        logger = InputLogger()
     logger.run()
