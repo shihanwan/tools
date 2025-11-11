@@ -1,9 +1,8 @@
 import json
-import time
 import os
-from pynput import keyboard
+import time
 from datetime import datetime
-import threading
+from pynput import keyboard
 
 
 class InputLogger:
@@ -12,6 +11,7 @@ class InputLogger:
         self.start_time = None
         self.is_recording = False
         self.tracked_keys = {"w", "a", "s", "d", "space"}
+        self.timestamp_format = "%d/%m/%Y %H:%M:%S.%f"
 
     def start_recording(self):
         """Start recording inputs"""
@@ -27,8 +27,7 @@ class InputLogger:
             return
 
         self.is_recording = False
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"gameplay_inputs_{timestamp}.json"
+        filename = f"gameplay_inputs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
 
         # Save to JSON
         output_data = {
@@ -63,15 +62,15 @@ class InputLogger:
 
         # Only log tracked keys
         if key_name in self.tracked_keys:
-            relative_time = time.time() - self.start_time
+            timestamp = datetime.now().strftime(self.timestamp_format)[:-3]
             self.inputs.append(
                 {
-                    "timestamp": round(relative_time, 4),
+                    "timestamp": timestamp,
                     "key": key_name,
                     "action": "press",
                 }
             )
-            print(f"⌨️  [{relative_time:.3f}s] {key_name.upper()} pressed")
+            print(f"⌨️  [{timestamp}] {key_name.upper()} pressed")
 
     def on_release(self, key):
         """Called when a key is released"""
@@ -90,10 +89,10 @@ class InputLogger:
 
         # Only log tracked keys
         if key_name in self.tracked_keys:
-            relative_time = time.time() - self.start_time
+            timestamp = datetime.now().strftime(self.timestamp_format)[:-3]
             self.inputs.append(
                 {
-                    "timestamp": round(relative_time, 4),
+                    "timestamp": timestamp,
                     "key": key_name,
                     "action": "release",
                 }
