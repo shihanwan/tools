@@ -78,7 +78,7 @@ class InputLogger:
     def on_release(self, key):
         """Called when a key is released"""
         # ESC to stop recording
-        if key == keyboard.Key.esc:
+        if key == keyboard.Key.delete:
             self.stop_recording()
             return False  # Stop listener
 
@@ -108,7 +108,7 @@ class InputLogger:
         print("=" * 50)
         print("🎮 GAMEPLAY INPUT LOGGER")
         print("=" * 50)
-        print("\nTracking keys: W, A, S, D, SPACE")
+        print(f"\nTracking keys: {', '.join(self.tracked_keys)}")
         print("\nPress ENTER to start recording...")
         input()
 
