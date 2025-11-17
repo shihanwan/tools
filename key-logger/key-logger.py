@@ -20,7 +20,7 @@ class InputLogger:
         self.start_time = time.time()
         self.is_recording = True
         print("\n🔴 RECORDING STARTED")
-        print("Playing your game now! Press ESC to stop recording.\n")
+        print("Playing your game now! Press Backspace or Delete to stop recording.\n")
 
     def stop_recording(self):
         """Stop recording and save to file"""
@@ -77,10 +77,9 @@ class InputLogger:
 
     def on_release(self, key):
         """Called when a key is released"""
-        # ESC to stop recording
-        if key == keyboard.Key.delete:
+        if key in {keyboard.Key.delete, keyboard.Key.backspace}:
             self.stop_recording()
-            return False  # Stop listener
+            return False
 
         if not self.is_recording:
             return
